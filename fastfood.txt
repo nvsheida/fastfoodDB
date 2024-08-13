@@ -1,0 +1,126 @@
+create database yummy;
+
+create table employee(
+employee_id int primary key auto_increment,
+first_name varchar(25),
+last_name varchar(25),
+position varchar(25)
+);
+
+create table customer(
+customer_id int primary key auto_increment,
+full_name varchar(50),
+phonenumber varchar(12),
+address varchar(100),
+order_date date,
+employee_id int,
+foreign key(employee_id) references employee(employee_id)
+);
+
+create table material(
+material_code int primary key,
+material_name varchar(25),
+price decimal(5,2),
+number_mat int,
+production_date date,
+expiry_date date,
+employee_id int,
+foreign key(employee_id) references employee(employee_id)
+);
+
+create table food(
+food_code int,
+food_name varchar(25),
+price decimal(5,2),
+number_food int,
+customer_id int,
+recive_date datetime,
+foreign key(customer_id) references customer(customer_id)
+);
+
+create table usiing(
+material_code int,
+food_code int,
+primary key(material_code,food_code)
+);
+
+
+
+insert into usiing
+(material_code,
+food_code
+)
+values(
+12345,
+15520
+);
+
+insert into food(
+food_code,
+food_name,
+price,
+number_food,
+customer_id,
+recive_date
+)
+values(
+15520,
+"pizza",
+445,
+2,
+3,
+"2023-09-06 23:00:00"
+);
+
+select * from material;
+select * from employee;
+select * from food;
+select * from customer;
+select * from usiing;
+select * from material where price between 25 and 50;
+select * from food join customer on food.customer_id = customer.customer_id;
+select usiing.material_code, food.food_code, food.food_name from usiing join food on usiing.food_code= food.food_code;
+select* from employee order by first_name;
+select* from employee order by first_name desc;
+select* from employee where position = "Chef" and first_name = "Sheida";
+select distinct employee.employee_id , employee.first_name, employee.last_name from material,employee where employee.employee_id = material.employee_id;
+select count(*) from customer;
+select avg(price) from material;
+select max(price) from material;
+select min(price) from material;
+select sum(price) from food where food_code = 15520;
+
+
+
+create view waiter as select * from employee where position= "waiter";
+select * from waiter;
+
+-- ویو ساخته شده کارمندانی را نشان می دهد که شغلشان پیشخدمتی است
+
+delimiter $$
+create procedure find_customer(in id int)
+begin
+	select * from customer where customer_id = id;
+end $$
+delimiter ; 
+
+call find_customer(1);
+-- این پرسیجر می تواند با گرفتن آیدی مشتری اطلاعات او را بالا بیاورد از آنجایی که کدم ارور میداد سرچ کردم یک جا گفت برای اینکه نشون بده تابعت شروع و پایان داره میتونی از
+-- delimiterاستفاده کنی
+
+update employee
+set salary = hourly_pay * 2080;
+-- اگر چهل ساعت در هفته حساب کنیم و پنجاه و دو هفته کاری در سال داشته باشیم حاصل ضرب آن 2080 می شود که حاصل ضرب آن با دستمزد ساعتی حقوق قرار دادم
+
+ create trigger before_hourly_pay before update on employee
+ for each row 
+ set new.salary = (new.hourly_pay * 2080);
+ 
+ -- تریگر ساخته شده اینگونه عمل می کند که اگر افزایش حقوقی در دستمزد ساعتی رخ داد حقوق ماهیانه را بروزرسانی کند
+ 
+ update employee set hourly_pay = 50 where employee_id = 1;
+ select * from employee;
+  update employee set hourly_pay = hourly_pay + 5;
+  
+ -- حالا به صورت اتوماتیک تریگر این اعمال رو محاسبه می کنه
+ 
